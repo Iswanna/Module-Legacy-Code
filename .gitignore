@@ -1,1 +1,18 @@
+# Python virtual environments
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Database data (CRITICAL: Do not commit the database itself)
+db/pg_data/
+
+# Environment secrets (Security risk!)
+.env
+
+# OS/IDEs
 .DS_Store
+.vscode/
