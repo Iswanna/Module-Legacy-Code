@@ -18,6 +18,7 @@ from flask_jwt_extended import (
 from datetime import timedelta
 
 MINIMUM_PASSWORD_LENGTH = 5
+MAX_BLOOM_LENGTH = 280
 
 
 def login():
@@ -158,6 +159,16 @@ def send_bloom():
 
     user = get_current_user()
 
+    if len(request.json["content"]) > MAX_BLOOM_LENGTH:
+        return make_response(
+            (
+                {
+                    "success": False,
+                    "message": f"Bloom must be less than {MAX_BLOOM_LENGTH} characters long",
+                },
+                400
+            )
+        )
     blooms.add_bloom(sender=user, content=request.json["content"])
 
     return jsonify(
