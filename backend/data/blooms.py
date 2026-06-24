@@ -140,3 +140,19 @@ def make_limit_clause(limit: Optional[int], kwargs: Dict[Any, Any]) -> str:
     else:
         limit_clause = ""
     return limit_clause
+
+
+def add_rebloom(*, rebloomer: User, original_bloom_id: int):
+    now = datetime.datetime.now(tz=datetime.UTC)
+    rebloom_id = int(now.timestamp() * 1000000)
+
+    with db_cursor() as cur:
+        cur.execute(
+            "INSERT INTO reblooms (id, rebloomer_id, bloom_id, rebloom_timestamp) VALUES (%(id)s, %(rebloomer_id)s, %(original_id)s, %(timestamp)s)",
+            dict(
+                id=rebloom_id,
+                rebloomer_id=rebloomer.id,
+                original_id=original_bloom_id, 
+                timestamp=datetime.datetime.now(datetime.UTC),
+            ),
+        )
