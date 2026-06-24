@@ -14,6 +14,7 @@ from endpoints import (
     send_bloom,
     suggested_follows,
     user_blooms,
+    do_rebloom,
 )
 
 from dotenv import load_dotenv
