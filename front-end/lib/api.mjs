@@ -173,6 +173,27 @@ async function getBlooms(username) {
   }
 }
 
+async function rebloom(bloomId) {
+  try {
+    // 1. Logic: Call our new backend door
+    const data = await _apiRequest(`/rebloom/${bloomId}`, {
+      method: "POST",
+    });
+
+    if (data.success) {
+      // 2. Logic: Refresh the blooms so the new re-bloom appears in the timeline
+      await getBlooms();
+      // Also refresh the profile stats (to show the re-bloom count increasing)
+      await getProfile(state.currentUser);
+    }
+
+    return data;
+  } catch (error) {
+    // Error is handled by _apiRequest's dialog
+    return { success: false };
+  }
+}
+
 /**
  * Fetches blooms containing a specific hashtag
  */
@@ -284,6 +305,7 @@ async function unfollowUser(username) {
 const apiService = {
   // Auth methods
   login,
+  rebloom,
   signup,
   logout,
 
