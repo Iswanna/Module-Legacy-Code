@@ -234,11 +234,23 @@
     <!-- Bloom Template -->
     <template id="bloom-template">
       <article class="bloom box" data-bloom data-bloom-id="">
+        <!-- The Re-bloom Indicator (Hidden by default) -->
+        <div data-rebloom-indicator class="rebloom-indicator" style="display: none;">
+          🔄 Re-bloomed by <span data-rebloomer-name></span>
+        </div>
+
         <div class="bloom__header flex">
           <a href="#" class="bloom__username" data-username>Username</a>
           <a href="#" class="bloom__time"><time class="bloom__time" data-time>2m</time></a>
         </div>
         <div class="bloom__content" data-content></div>
+
+        <!-- 2. The Re-bloom Button -->
+        <div class="bloom__actions">
+          <button type="button" data-action="rebloom" class="bloom__rebloom-btn">
+            Re-bloom
+          </button>
+        </div>
       </article>
     </template>
 
