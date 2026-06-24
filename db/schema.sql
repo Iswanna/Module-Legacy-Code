@@ -28,8 +28,8 @@ CREATE TABLE hashtags (
 );
 
 CREATE TABLE reblooms (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     rebloomer_id INTEGER NOT NULL REFERENCES users(id),
-    bloom_id INTEGER NOT NULL REFERENCES blooms(id),
+    bloom_id BIGINT NOT NULL REFERENCES blooms(id),
     rebloom_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
