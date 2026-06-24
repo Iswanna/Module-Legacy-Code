@@ -166,6 +166,19 @@ def send_bloom():
         }
     )
 
+@jwt_required()
+def do_rebloom(id_str):
+    try:
+        bloom_id = int(id_str)
+    except ValueError:
+        return make_response(("Invalid bloom id", 400))
+
+    user = get_current_user()
+
+    blooms.add_rebloom(rebloomer=user, original_bloom_id=bloom_id)
+
+    return jsonify({"success": True})
+
 
 def get_bloom(id_str):
     try:
