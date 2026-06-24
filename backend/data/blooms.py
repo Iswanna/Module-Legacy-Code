@@ -13,6 +13,7 @@ class Bloom:
     sender: User
     content: str
     sent_timestamp: datetime.datetime
+    rebloomer_username: str = None
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
@@ -178,4 +179,19 @@ def get_reblooms_for_user(username, limit=50):
             """,
             (username, limit)
         )
-        return cur.fetchall()
+        rows = cur.fetchall()
+        results = []
+        for row in rows:
+            # 1. Unpack the tuple in the EXACT order of your SELECT statement above
+            rebloom_id, timestamp, rebloomer, content, original_author, author_id = row
+            
+            # 2. Now these names exist! We can use them to build the object
+            b = Bloom(
+                id=rebloom_id,
+                sender=original_author,
+                content=content,
+                sent_timestamp=timestamp,
+                rebloomer_username=rebloomer 
+            )
+            results.append(b)
+    return results
