@@ -156,3 +156,26 @@ def add_rebloom(*, rebloomer: User, original_bloom_id: int):
                 timestamp=datetime.datetime.now(datetime.UTC),
             ),
         )
+
+def get_reblooms_for_user(username, limit=50):
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            SELECT 
+                r.id AS id,
+                r.rebloom_timestamp AS sent_timestamp, -- We name it the same as the original for sorting!
+                rebloomer.username AS rebloomer_username,
+                b.content AS content,
+                author.username AS username,
+                author.id AS sender_id
+            FROM reblooms r
+            JOIN users rebloomer ON r.rebloomer_id = rebloomer.id
+            JOIN blooms b ON r.bloom_id = b.id
+            JOIN users author ON b.sender_id = author.id
+            WHERE rebloomer.username = %s
+            ORDER BY r.rebloom_timestamp DESC
+            LIMIT %s
+            """,
+            (username, limit)
+        )
+        return cur.fetchall()
