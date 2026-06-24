@@ -166,7 +166,7 @@ def get_reblooms_for_user(username, limit=50):
                 r.rebloom_timestamp AS sent_timestamp, -- We name it the same as the original for sorting!
                 rebloomer.username AS rebloomer_username,
                 b.content AS content,
-                author.username AS username,
+                author.username AS sender,
                 author.id AS sender_id
             FROM reblooms r
             JOIN users rebloomer ON r.rebloomer_id = rebloomer.id
