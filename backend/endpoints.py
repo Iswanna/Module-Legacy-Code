@@ -202,14 +202,25 @@ def home_timeline():
         for followed_user in followed_users
     ]
 
+    # Get re-blooms from followed users
+    nested_user_reblooms = [
+        blooms.get_reblooms_for_user(followed_user, limit=50)
+        for followed_user in followed_users
+    ]
     # Flatten list of blooms from followed users
     followed_blooms = [bloom for blooms in nested_user_blooms for bloom in blooms]
+
+    # Flatten list of re-blooms from followed users
+    followed_reblooms = [rebloom for reblooms in nested_user_reblooms for rebloom in reblooms]
 
     # Get the current user's own blooms
     own_blooms = blooms.get_blooms_for_user(current_user.username, limit=50)
 
-    # Combine own blooms with followed blooms
-    all_blooms = followed_blooms + own_blooms
+    # Get the current user's own re-blooms
+    own_reblooms = blooms.get_reblooms_for_user(current_user.username, limit=50)
+
+    # Combine all original blooms and re-blooms together
+    all_blooms = followed_blooms + followed_reblooms + own_blooms + own_reblooms
 
     # Sort by timestamp (newest first)
     sorted_blooms = list(
