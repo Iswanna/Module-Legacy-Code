@@ -26,3 +26,10 @@ CREATE TABLE hashtags (
     bloom_id BIGINT NOT NULL REFERENCES blooms(id),
     UNIQUE(hashtag, bloom_id)
 );
+
+CREATE TABLE reblooms (
+    id SERIAL PRIMARY KEY,
+    rebloomer_id INTEGER NOT NULL REFERENCES users(id),
+    bloom_id INTEGER NOT NULL REFERENCES blooms(id),
+    rebloom_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
