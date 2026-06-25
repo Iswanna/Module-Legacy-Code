@@ -164,7 +164,7 @@ def send_bloom():
             (
                 {
                     "success": False,
-                    "message": f"Bloom must be less than {MAX_BLOOM_LENGTH} characters long",
+                    "message": f"Bloom must not exceed {MAX_BLOOM_LENGTH} characters",
                 },
                 400
             )
