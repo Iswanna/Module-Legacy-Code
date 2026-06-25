@@ -14,6 +14,7 @@ class Bloom:
     content: str
     sent_timestamp: datetime.datetime
     rebloomer_username: str = None
+    rebloom_count: int = 0
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
@@ -55,12 +56,17 @@ def get_blooms_for_user(
 
         cur.execute(
             f"""SELECT
-              blooms.id, users.username, content, send_timestamp
+              blooms.id, users.username, content, send_timestamp,
+              COUNT(reblooms.id)
             FROM
-              blooms INNER JOIN users ON users.id = blooms.sender_id
+              blooms 
+              INNER JOIN users ON users.id = blooms.sender_id
+              LEFT JOIN reblooms ON reblooms.bloom_id = blooms.id
             WHERE
               username = %(sender_username)s
               {before_clause}
+            GROUP BY 
+              blooms.id, users.username, content, send_timestamp
             ORDER BY send_timestamp DESC
             {limit_clause}
             """,
@@ -69,13 +75,16 @@ def get_blooms_for_user(
         rows = cur.fetchall()
         blooms = []
         for row in rows:
-            bloom_id, sender_username, content, timestamp = row
+            # 1. Provide a name for every column in the SQL (order matters!)
+            bloom_id, sender_username, content, timestamp, count = row
+            # 2. Use those names to build the object
             blooms.append(
                 Bloom(
                     id=bloom_id,
                     sender=sender_username,
                     content=content,
                     sent_timestamp=timestamp,
+                    rebloom_count=count
                 )
             )
     return blooms

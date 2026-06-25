@@ -37,6 +37,7 @@ const createBloom = (template, bloom) => {
   const rebloomIndicator = bloomFrag.querySelector("[data-rebloom-indicator]");
   const rebloomerName = bloomFrag.querySelector("[data-rebloomer-name]");
   const rebloomButton = bloomFrag.querySelector("[data-action='rebloom']");
+  const countElement = bloomFrag.querySelector("[data-rebloom-count]");
 
   // Conditional Logic: "If this data object represents a re-bloom..."
   if (bloom.rebloomer_username) {
@@ -47,6 +48,7 @@ const createBloom = (template, bloom) => {
     // Let's hide the button if it's already a re-bloom.
     rebloomButton.style.display = "none";
   }
+  countElement.textContent = bloom.rebloom_count > 0 ? `(${bloom.rebloom_count})` : "";
 
   // Event Listener: "What happens when I click the button?"
   rebloomButton?.addEventListener("click", async () => {
