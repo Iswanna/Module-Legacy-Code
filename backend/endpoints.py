@@ -1,6 +1,6 @@
 from typing import Dict, Union
 from data import blooms
-from data.follows import follow, get_followed_usernames, get_inverse_followed_usernames
+from data.follows import follow, unfollow, get_followed_usernames, get_inverse_followed_usernames
 from data.users import (
     UserRegistrationError,
     get_suggested_follows,
@@ -149,6 +149,24 @@ def do_follow():
         }
     )
 
+@jwt_required()
+def do_unfollow(target_username): # Flask passes the name from the URL here
+    # 1. Identify the user who is logged in
+    current_user = get_current_user()
+    
+    # 2. Identify the user to be unfollowed
+    target_user = get_user(target_username)
+
+    # 3. Handle if the target doesn't exist
+    if target_user is None:
+        return make_response(
+            (f"Cannot unfollow {target_username} - user does not exist", 404)
+        )
+
+    # 4. PERFORM THE ACTION (Calling your function from data/follows.py)
+    unfollow(current_user, target_user)
+
+    return jsonify({"success": True})
 
 @jwt_required()
 def send_bloom():
