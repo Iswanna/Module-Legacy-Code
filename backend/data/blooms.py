@@ -16,6 +16,7 @@ class Bloom:
     sent_timestamp: datetime.datetime
     rebloomer_username: str = None
     rebloom_count: int = 0
+    is_rebloomed_by_me: bool = False
 
 
 def add_bloom(*, sender: User, content: str) -> Bloom:
@@ -41,11 +42,12 @@ def add_bloom(*, sender: User, content: str) -> Bloom:
 
 
 def get_blooms_for_user(
-    username: str, *, before: Optional[int] = None, limit: Optional[int] = None
+    username: str, *, viewer_id: Optional[int] = None, before: Optional[int] = None, limit: Optional[int] = None
 ) -> List[Bloom]:
     with db_cursor() as cur:
         kwargs = {
             "sender_username": username,
+            "viewer_id": viewer_id
         }
         if before is not None:
             before_clause = "AND send_timestamp < %(before_limit)s"
@@ -58,7 +60,12 @@ def get_blooms_for_user(
         cur.execute(
             f"""SELECT
               blooms.id, users.username, content, send_timestamp,
-              COUNT(reblooms.id)
+              COUNT(reblooms.id),
+              EXISTS (
+                  SELECT 1 FROM reblooms 
+                  WHERE reblooms.bloom_id = blooms.id 
+                  AND rebloomer_id = %(viewer_id)s
+              )
             FROM
               blooms 
               INNER JOIN users ON users.id = blooms.sender_id
@@ -77,7 +84,7 @@ def get_blooms_for_user(
         blooms = []
         for row in rows:
             # 1. Provide a name for every column in the SQL (order matters!)
-            bloom_id, sender_username, content, timestamp, count = row
+            bloom_id, sender_username, content, timestamp, count, rebloomed_by_me = row
             # 2. Use those names to build the object
             blooms.append(
                 Bloom(
@@ -85,7 +92,8 @@ def get_blooms_for_user(
                     sender=sender_username,
                     content=content,
                     sent_timestamp=timestamp,
-                    rebloom_count=count
+                    rebloom_count=count,
+                    is_rebloomed_by_me=rebloomed_by_me
                 )
             )
     return blooms
@@ -171,7 +179,9 @@ def add_rebloom(*, rebloomer: User, original_bloom_id: int):
         except UniqueViolation:
             pass
 
-def get_reblooms_for_user(username, limit=50):
+def get_reblooms_for_user(
+    username: str, *, viewer_id: Optional[int] = None, limit: Optional[int] = 50
+):
     with db_cursor() as cur:
         cur.execute(
             """
@@ -181,22 +191,31 @@ def get_reblooms_for_user(username, limit=50):
                 rebloomer.username AS rebloomer_username,
                 b.content AS content,
                 author.username AS sender,
-                author.id AS sender_id
+                EXISTS (
+                    SELECT 1
+                    FROM reblooms viewer_reblooms
+                    WHERE viewer_reblooms.bloom_id = b.id
+                      AND viewer_reblooms.rebloomer_id = %(viewer_id)s
+                ) AS is_rebloomed_by_me
             FROM reblooms r
             JOIN users rebloomer ON r.rebloomer_id = rebloomer.id
             JOIN blooms b ON r.bloom_id = b.id
             JOIN users author ON b.sender_id = author.id
-            WHERE rebloomer.username = %s
+            WHERE rebloomer.username = %(username)s
             ORDER BY r.rebloom_timestamp DESC
-            LIMIT %s
+            LIMIT %(limit)s
             """,
-            (username, limit)
+            {
+                "username": username,
+                "viewer_id": viewer_id,
+                "limit": limit,
+            },
         )
         rows = cur.fetchall()
         results = []
         for row in rows:
             # 1. Unpack the tuple in the EXACT order of your SELECT statement above
-            rebloom_id, timestamp, rebloomer, content, original_author, author_id = row
+            rebloom_id, timestamp, rebloomer, content, original_author, is_rebloomed_by_me = row
             
             # 2. Now these names exist! We can use them to build the object
             b = Bloom(
@@ -204,7 +223,8 @@ def get_reblooms_for_user(username, limit=50):
                 sender=original_author,
                 content=content,
                 sent_timestamp=timestamp,
-                rebloomer_username=rebloomer 
+                rebloomer_username=rebloomer,
+                is_rebloomed_by_me=is_rebloomed_by_me,
             )
             results.append(b)
     return results
