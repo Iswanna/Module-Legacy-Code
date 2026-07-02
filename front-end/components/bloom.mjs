@@ -44,12 +44,14 @@ const createBloom = (template, bloom) => {
     // Show the "Re-bloomed by" banner and set the name
     rebloomIndicator.style.display = "block"; 
     rebloomerName.textContent = bloom.rebloomer_username;
-    
-    // Let's hide the button if it's already a re-bloom.
-    rebloomButton.style.display = "none";
+
   }
   countElement.textContent = bloom.rebloom_count > 0 ? `(${bloom.rebloom_count})` : "";
 
+  if (bloom.rebloomer_username || bloom.is_rebloomed_by_me) {
+    rebloomButton.style.display = "none";
+  }
+  
   // Event Listener: "What happens when I click the button?"
   rebloomButton?.addEventListener("click", async () => {
     try {
