@@ -31,5 +31,6 @@ CREATE TABLE reblooms (
     id BIGSERIAL PRIMARY KEY,
     rebloomer_id INTEGER NOT NULL REFERENCES users(id),
     bloom_id BIGINT NOT NULL REFERENCES blooms(id),
-    rebloom_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    rebloom_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(rebloomer_id, bloom_id)
 );
